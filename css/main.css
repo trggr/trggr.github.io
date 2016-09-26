@@ -1,7 +1,3 @@
-@import url(http://fonts.googleapis.com/css?family=Droid+Sans|Droid+Sans+Mono|Droid+Serif);
-
-@media all
-{
     html {
 	margin: 0;
 	font: .9em/1.6em "Droid Serif", Cambria, Georgia, "DejaVu Serif", serif;
@@ -890,29 +886,3 @@
 
     #show_source {margin: 0; padding: 0;}
 
-    #postamble {
-	font-size: 75%;
-	min-width: 700px;
-	max-width: 80%;
-	margin-left: 20px;
-	margin-top: 10px;
-	padding: .2em;
-	border: 1px solid gray;
-	background-color: #ffffff;
-	z-index: -1000;
-    }
-
-
-} /* END OF @media all */
-
-
-
-@media screen
-{
-    #table-of-contents {
-	float: right;
-	border: 1px solid #CCC;
-	max-width: 50%;
-	overflow: auto;
-    }
-} /* END OF @media screen */
