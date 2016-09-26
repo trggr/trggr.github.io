@@ -2,9 +2,6 @@
 layout: post
 ---
 
-
-# Using Swing in Clojure
-
 I like Clojure and often need to explore its data structures.
 When the structure is large, I'd prefer some UI to scroll
 and drill down. Of course, there's `clojure.inspector`, but I

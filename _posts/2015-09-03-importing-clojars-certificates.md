@@ -2,9 +2,6 @@
 layout: post
 ---
 
-
-# Importing Clojars.org Certificate 
-
 http://alexfalkowski.blogspot.com/2013/12/leiningen-https-issues.html
 
 ```

@@ -2,8 +2,6 @@
 layout: post
 ---
 
-# Clojure Tricks
-
 ### Methods in Java
 To get the list of the methods of a Java object use `reflect`
 

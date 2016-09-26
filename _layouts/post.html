@@ -2,13 +2,13 @@
 layout: default
 ---
 
-<h2>
-    {{ page.title }}
-</h2>
-<time>
-    {{ page.date | date: "%b %-d, %Y" }}{% if page.author %} -
-    {{ page.author }}{% endif %}{% if page.meta %} -
-    {{ page.meta }}{% endif %}
-</time>
+<h2> {{ page.title }}</h2>
+{{ page.date | date: "%b %-d, %Y" }}
+<!--time--> 
+    {% if page.author %} - {{ page.author }}{% endif %}
+    {% if page.meta %} - {{ page.meta }}{% endif %}
+<!--/time-->
+
+<p>
 
 {{ content }}
