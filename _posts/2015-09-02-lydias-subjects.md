@@ -2,8 +2,6 @@
 layout: post
 ---
 
-##  Lydia's Subjects
-
 N | Subject                 | Teacher
 --|-------------------------|--------------------------------------------
 1 | Wellness-10             | Mr. O'Gara
