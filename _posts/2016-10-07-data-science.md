@@ -36,15 +36,17 @@ Data -> Insert Table, use "My table has headers".
   The formula uses a location from the current table (symbol @) to find an index
   of a matching location from TaxRates table. Use the index to return a tax rate.
 
-    =[@Salary]*INDEX(TaxRates[Tax Rate],MATCH([@Location], TaxRates[Location]))
+       =[@Salary]*INDEX(TaxRates[Tax Rate],MATCH([@Location], TaxRates[Location]))
 
-    Employees
-      Salary
-      Location
+  for the data model:
 
-    TaxRates
-      Location (PK)
-      TaxRate
+       Employees
+           Salary
+           Location
+
+       TaxRates
+           Location (PK)
+           TaxRate
 
 - Internally, Excel is using a relative reference to other columns (R1C1 format),
   so A10 is refered from B10 as RC[-1], or R[0]C[-1] - the same row, prior column. 
