@@ -4,9 +4,9 @@ layout: post
 
 #### Electoral Votes
 
-I was intereste to see how the populations of states translate into
-electoral votes. I got the list of states, their populations,
-and the number of electoral votes [here](http://state.1keydata.com/state-electoral-votes.php);
+I was interested to see how the size of a state populations 
+translates into electoral votes. From [1keydata](http://state.1keydata.com/state-electoral-votes.php)
+I have got a list of states' populations and the number of their electoral votes, and
 put it into an Excel spreadsheet to see which states' have more voting clout.
 
 Turns out Wyoming with its population of 586K and three
@@ -88,4 +88,14 @@ into markdown.
                            TEXT([PopVoteRatio],"??????") &"|"&
                            TEXT([PopVoteRatioRank], "??")
              
+
+### Cross compilation of Go programs
+
+I learned how to compile Go programs for Raspberry Pi by under Windows.
+
+    set GOOS=linux
+    set GOARCH=arm
+    go build -o test test.go
+
+You can then upload program "test" to Raspberry Pi and it runs there.
 
