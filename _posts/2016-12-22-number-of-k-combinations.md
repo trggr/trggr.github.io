@@ -43,18 +43,16 @@ them:
 
     3! = 6
 
-So now, out of 24 snakes, only six give us what we need and we have:
-
-    24/6 = 4!/3! = 4, or
+Out of 24 snakes, only four give us what we need: 4!/3! = 24/6 = 4, or
     
     N!/K!  = permutations(N)/permutations(K)                     (1)
 
-And this is the way to count the number of ways to pick three combinations out of four items.
+And this is the way to count the number of ways to pick three items out of four items.
 
 Permutations divided by permutations - this so far looks good.
 
-Only what if I know want to count the ways to get two items out of four? In other words,
-will it work the same if I want to count snakes' heads and necks only?
+Only what if I now want to count the ways to get two items out of four? In other words,
+will it work the same if I want to count snakes' with unique heads and necks only?
 
 If I'll try to use formula (1), it'll give me 12 snakes with heads and necks made out of 1 and 2.
 This is too many. We know there are only four: 1, 2, 7, 8.
@@ -83,5 +81,5 @@ In our case, it'll be:
     -------------- =  ----- = 6
     (4 - 2)! * 2!]    2 * 2
  
-This is a universal formula, which gives us six. 
+This is a universal formula, which gives us six 
 
