@@ -22,7 +22,7 @@ through the remaining items: 3 and 4.
     3 4 2 4 2 3    3 4 1 4 1 2     2 4 1 4 1 2     2 3 1 3 1 2
     4 3 4 2 3 2    4 3 4 1 3 1     4 2 4 1 2 1     3 2 3 1 2 1
 
-Those are called the permutations, here's how I count them:
+Those are called the permutations, and here's how I count them:
 
 - there are 4 groups in which I can fix 1, 2, 3 or 4.
 - in the remaining items, there are 3 ways for me to fix one of the
@@ -32,9 +32,10 @@ Those are called the permutations, here's how I count them:
 - which leaves me with a last item, and it's already fixed in
   its single place.
 
-    4*(4 - 1)*(4 - 2)*(4 - 3) = 4*3*2*1 = 4! = 24
 
-That's important to look at bubbles as permutations.
+    4*(4 - 1)*(4 - 2)*(4 - 3) = 4 * 3 * 2 * 1 = 4! = 24
+
+It's important to look at bubbles as permutations and count them as such.
 
 Now we want to count in which streams I have 1, 2, and 3 in the
 first 3 positions. Looking at my diagram, I see that they are in the streams:
