@@ -9,7 +9,7 @@ import (
 )
 
 const (
-    ITERATIONS       = 20
+    ITERATIONS       = 10000
     POLL_INTERVAL    = 120 * time.Second
     LOCATION_COMMAND = "termux-location"
 )
