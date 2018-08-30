@@ -1,34 +1,3 @@
-/* 
-# #!/data/data/com.termux/files/user/bin/bash
-# 
-# DB = "db.txt"
-# GPSOUT = "gpsout.txt"
-# LOCATION = "termux-location -p gps"
-# AWKPROG = "gps.awk"
-# AWK = "awk -F: -f $AWKPROG"
-# SMS = "termux-sms-send -n xxx-yyy-zzzz"
-# 
-# cat <<-! > $AWKPROG
-# { print \$2; }
-# !
-# 
-# if [ -w $DB ]
-# then
-#     mv $DB ${DB}O
-# fi
-# 
-# while true
-# do
-#     $LOCATION > $GPSOUT
-#     LAT=`cat $GPSOUT  | grep latitude  | $AWK`
-#     LONG=`cat $GPSOUT | grep longitude | $AWK`
-#     D=`date +%H:%M:%S`
-#     echo $D $LAT $LONG | tee -a $DB
-#     sleep 2   # 60
-# done
-
-*/
-
 package main
 
 import (  
@@ -41,7 +10,7 @@ import (
 
 const (
     ITERATIONS       = 20
-    POLL_INTERVAL    = 2 * time.Second
+    POLL_INTERVAL    = 120 * time.Second
     LOCATION_COMMAND = "termux-location"
 )
 
@@ -97,19 +66,13 @@ func main() {
 		fmt.Println("error parsing location:", err)
 	}
 
-//	fmt.Printf("%+v, %+v\n", priorloc, loc)
-
         if priorloc.Latitude != 0 {
             dist = distance(priorloc.Latitude, priorloc.Longitude,
                             loc.Latitude, loc.Longitude)
             totaldist += dist
             seconds = time.Since(priortime).Seconds()
             totalseconds +=  seconds
-//            if seconds != 0 {
-//                speed = dist*3.6/seconds
-//            } else {
-//                speed = 0
-//            }
+
             if totalseconds != 0 {
                 avgspeed = totaldist*3.6/totalseconds
             } else {
