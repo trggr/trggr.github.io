@@ -1,5 +1,6 @@
 ---
 layout: post
+titla:  Songs
 ---
 
 ВОЕННЫЕ
@@ -13,9 +14,9 @@ layout: post
 РОМАНСЫ
 
 [Калитка *](/songs/kalitka.txt)
-[Дорогой длинною **](/songs/dorogoi-dlinnoyu.txt)
-[Гори, гори, моя звезда ***](/songs/gori-gori-moya-zvezda.txt)
-[Я встретил вас ****](/songs/ya-vstretil-vas.txt)
+[Дорогой длинною *](/songs/dorogoi-dlinnoyu.txt)
+[Гори, гори, моя звезда *](/songs/gori-gori-moya-zvezda.txt)
+[Я встретил вас *](/songs/ya-vstretil-vas.txt)
 [Только раз *](/songs/tolko-raz.txt)
  
 BEE GEES
