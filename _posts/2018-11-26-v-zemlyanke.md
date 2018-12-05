@@ -188,9 +188,10 @@ layout: post
     Там, где гуще сплетаются ветки,
     У беседки тебя подожду
     И на самом пороге беседки
-    С милых уст кружева отведу.
+    С милых уст кружева отведу.                             
 
 [Калитка](/songs/kalitka.txt)
+[Дорогой длинною](/songs/dorogoi-dlinnoyu.txt) 
 
 [How Deep is Your Love](/songs/how-deep.txt)
                                                                
