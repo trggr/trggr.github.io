@@ -1,0 +1,261 @@
+#lang racket
+
+(define (make-tree value left right) (list value left right))
+(define (value tree) (car tree))
+(define (left tree)  (cadr  tree))
+(define (right tree) (caddr  tree))
+(define empty-tree? null?)
+
+(define example
+  (make-tree '+
+             (make-tree '*
+                        (make-tree '-
+                                   (make-tree 0 '() '())
+                                   (make-tree 2 '() '()))
+                        (make-tree 3 '() '()))
+             (make-tree '*
+                        (make-tree '-
+                                   (make-tree 4 '() '())
+                                   (make-tree 5 '() '()))
+                        (make-tree '1/
+                                   '()
+                                   (make-tree 6 '() '())))))
+
+(define example-no-unary
+  (make-tree '+
+             (make-tree '*
+                        (make-tree '-
+                                   (make-tree 0 '() '())
+                                   (make-tree 2 '() '()))
+                        (make-tree 3 '() '()))
+             (make-tree '*
+                        (make-tree '-
+                                   (make-tree 4 '() '())
+                                   (make-tree 5 '() '()))
+                        (make-tree 1 '() '()))))
+
+(define example-plus (make-tree '+
+                                (make-tree 1 '() '())
+                                (make-tree 2 '() '())))
+
+(define example-mult (make-tree '*
+                                (make-tree 3 '() '())
+                                (make-tree 2 '() '())))
+
+;;;; 1
+(define (apt-value t)
+  (if (empty-tree? t)
+      #f
+      (let ((v (value t)) (l (left t)) (r (right t)))
+        (cond ((and (empty-tree? l) (empty-tree? r)) v)
+              ((eq? '+ v) (+ (apt-value l) (apt-value r)))
+              ((eq? '* v) (* (apt-value l) (apt-value r)))
+              ((eq? '- v) (- (apt-value l) (apt-value r)))
+              ((eq? '1/ v) (/ 1 (apt-value r)))
+              (else v)))))
+
+;(= 3 (apt-value example-plus))
+;(= 6 (apt-value example-mult))
+;(= -7 (apt-value example-no-unary))
+;(= -37/6 (apt-value example))
+
+;;;; 2a
+(define (extract-preorder t)
+  (if (empty-tree? t)
+      #f
+      (let ((v (value t)) (l (left t)) (r (right t)))
+        (cond ((and (empty-tree? l) (empty-tree? r)) (list v))
+              ((or (eq? '+ v)
+                   (eq? '* v)
+                   (eq? '- v)) (append (list v) (extract-preorder l) (extract-preorder r)))
+              ((eq? '1/ v) (append (list v) (extract-preorder r)))
+              (else (list v))))))
+
+;(extract-preorder example-plus)
+;(extract-preorder example-mult)
+;(extract-preorder example-no-unary)
+;(extract-preorder example)
+
+;;;; 2b
+(define (extract-postorder t)
+  (if (empty-tree? t)
+      #f
+      (let ((v (value t)) (l (left t)) (r (right t)))
+        (cond ((and (empty-tree? l) (empty-tree? r)) (list v))
+              ((or (eq? '+ v)
+                   (eq? '* v)
+                   (eq? '- v)) (append (extract-postorder l) (extract-postorder r) (list v)))
+              ((eq? '1/ v) (append (extract-postorder r) (list v)))
+              (else (list v))))))
+
+;(extract-postorder example-plus)
+;(extract-postorder example-mult)
+;(extract-postorder example-no-unary)
+;(extract-postorder example)
+
+;;;; 2c
+(define (extract-inorder t)
+  (if (empty-tree? t)
+      #f
+      (let ((v (value t)) (l (left t)) (r (right t)))
+        (cond ((and (empty-tree? l) (empty-tree? r)) (list v))
+              ((or (eq? '+ v)
+                   (eq? '* v)
+                   (eq? '- v)) (append (extract-inorder l)  (list v) (extract-inorder r)))
+              ((eq? '1/ v) (append (list v) (extract-inorder r)))
+              (else (list v))))))
+
+;(extract-inorder example-plus)
+;(extract-inorder example-mult)
+;(extract-inorder example-no-unary)
+;(extract-inorder example)
+
+;;;; 2d
+(define (extract-infix-unique t)
+  (if (empty-tree? t)
+      #f
+      (let ((v (value t)) (l (left t)) (r (right t)))
+        (cond ((and (empty-tree? l) (empty-tree? r)) v)
+              ((or (eq? '+ v)
+                   (eq? '* v)
+                   (eq? '- v)) (list (extract-infix-unique l) v (extract-infix-unique r)))
+              ((eq? '1/ v) (list '1/ (extract-infix-unique r)))
+              (else v)))))
+
+;(extract-infix-unique example-plus)
+;(extract-infix-unique example-mult)
+;(extract-infix-unique example-no-unary)
+;(extract-infix-unique example)
+
+(define bst-example (make-tree 50
+                               (make-tree 30
+                                          (make-tree 10 '() '())
+                                          (make-tree 40 '() '()))
+                               (make-tree 70
+                                          (make-tree 60 '() '())
+                                          (make-tree 80
+                                                     (make-tree 75 '() '())
+                                                     '()))))
+
+(define bst-small-example (make-tree 30
+                                     (make-tree 12 null null)
+                                     (make-tree 40 null null)))
+
+;;;; 3a
+(define (bst-element? item bst same? less-than?)
+  (if (empty-tree? bst)
+      #f
+      (let ((v (value bst)))
+        (cond ((same? item v) #t)
+              ((less-than? item v) (bst-element? item (left bst) same? less-than?))
+              (else (bst-element? item (right bst) same? less-than?))))))
+
+;(bst-element? 10 bst-example = <)
+;(bst-element? 75 bst-example = <)
+;(bst-element? 60 bst-example = <)
+;(not (bst-element? 65 bst-example = <))
+
+;;;; 3b
+(define (bst-insert item bst same? less-than?)
+  (if (empty-tree? bst)
+      (make-tree item null null)
+      (let ((v (value bst)))
+        (if (same? item v)
+            bst
+            (if (less-than? item v)
+                (make-tree v
+                           (bst-insert item (left bst) same? less-than?)
+                           (right bst))
+                (make-tree v
+                           (left bst)
+                           (bst-insert item (right bst) same? less-than?)))))))
+
+;(bst-insert 1 '() = <)
+;(bst-insert 35 bst-small-example = <)
+;(bst-insert 15 bst-small-example = <)
+;(bst-insert 5 bst-small-example = <)
+;(bst-insert 1 (bst-insert 5 bst-small-example = <) = <)
+;(bst-insert 1 (bst-insert 12 bst-small-example = <) = <)
+
+;;;; 3c
+(define (bst-smallest bst)
+  (if (empty-tree? bst)
+      #f
+      (let ((l (left bst)))
+        (if (null? l)
+            (value bst)
+            (bst-smallest l)))))
+
+;(= 12 (bst-smallest bst-small-example))
+;(= 10 (bst-smallest bst-example))
+
+;;;; 3d
+(define (bst-largest bst)
+  (if (empty-tree? bst)
+      #f
+      (let ((r (right bst)))
+        (if (null? r)
+            (value bst)
+            (bst-largest r)))))
+
+;(= 40 (bst-largest bst-small-example))
+;(= 80 (bst-largest bst-example))
+
+;;;; 3e
+(define (bst-equal? x y same?)
+  (if (and (null? x) (null? y))
+      #t
+      (if (or (null? x) (null? y))
+          #f
+          (and (same? (value x) (value y))
+               (bst-equal? (left x) (left y) same?)
+               (bst-equal? (right x) (right y) same?)))))
+
+;(eq? #f (bst-equal? bst-small-example '() =))
+;(eq? #t (bst-equal? bst-small-example bst-small-example =))
+
+;;;; 4a
+(define (bst-subset? small big same? less-than?)
+  (if (null? small)
+      #t
+      (if (null? big)
+          #f
+          (if (bst-element? (value small) big same? less-than?)
+              (bst-subset? (left small) big same? less-than?)
+              (bst-subset? (right small) big same? less-than?)))))
+               
+;; 4a test
+(define bst-example-set (foldl (lambda (item bst) (bst-insert item bst = <))
+                               '()
+                               '(5 1 7 4 9)))
+(define bst-example-subset (foldl (lambda (item bst) (bst-insert item bst = <))
+                                  '()
+                                  '(5 1 7 4)))
+
+(bst-subset? bst-example-set bst-example-set = <)
+(bst-subset? null bst-example-set = <)
+(bst-subset? bst-example-set bst-example-subset = <)
+ 
+;(bst-equal? (make-tree 5
+;                       (make-tree 1
+;                                  null
+;                                  (make-tree 4 null null))
+;                       (make-tree 7
+;                                  null
+;                                  (make-tree 9 null null)))
+;            (foldl (lambda (item bst)
+;                     (bst-insert item bst = <))
+;                   '()
+;                   '(5 1 7 9 4))
+;            =)
+
+;;; 4b
+;(define (bst-set-difference x y same? less-than?)
+;  (if (null? small)
+;      #t
+;      (if (null? big)
+;          #f
+;          (and (bst-element? (value small) big same? less-than?)
+;               (bst-subset? (left small) big same? less-than?)
+;               (bst-subset? (right small) big same? less-than?)))))
+
