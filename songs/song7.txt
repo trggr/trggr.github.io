@@ -216,46 +216,122 @@
 
 ;;;; 4a
 (define (bst-subset? small big same? less-than?)
-  (if (null? small)
+  (if (empty-tree? small)
       #t
-      (if (null? big)
+      (if (empty-tree? big)
           #f
-          (if (bst-element? (value small) big same? less-than?)
-              (bst-subset? (left small) big same? less-than?)
-              (bst-subset? (right small) big same? less-than?)))))
+          (and (bst-element? (value small) big same? less-than?)
+               (bst-subset? (left small) big same? less-than?)
+               (bst-subset? (right small) big same? less-than?)))))
                
 ;; 4a test
-(define bst-example-set (foldl (lambda (item bst) (bst-insert item bst = <))
-                               '()
-                               '(5 1 7 4 9)))
-(define bst-example-subset (foldl (lambda (item bst) (bst-insert item bst = <))
-                                  '()
-                                  '(5 1 7 4)))
+(define bst-example-51749 (foldl (lambda (item bst) (bst-insert item bst = <))
+                                 '()
+                                 '(5 1 7 4 9)))
 
-(bst-subset? bst-example-set bst-example-set = <)
-(bst-subset? null bst-example-set = <)
-(bst-subset? bst-example-set bst-example-subset = <)
- 
-;(bst-equal? (make-tree 5
-;                       (make-tree 1
-;                                  null
-;                                  (make-tree 4 null null))
-;                       (make-tree 7
-;                                  null
-;                                  (make-tree 9 null null)))
-;            (foldl (lambda (item bst)
-;                     (bst-insert item bst = <))
-;                   '()
-;                   '(5 1 7 9 4))
-;            =)
+(define bst-example-5174 (foldl (lambda (item bst) (bst-insert item bst = <))
+                                '()
+                                '(5 1 7 4)))
 
-;;; 4b
-;(define (bst-set-difference x y same? less-than?)
-;  (if (null? small)
-;      #t
-;      (if (null? big)
-;          #f
-;          (and (bst-element? (value small) big same? less-than?)
-;               (bst-subset? (left small) big same? less-than?)
-;               (bst-subset? (right small) big same? less-than?)))))
+(define bst-example-5176 (foldl (lambda (item bst) (bst-insert item bst = <))
+                                '()
+                                '(5 1 7 6)))
 
+;(bst-subset? bst-example-51749 bst-example-51749 = <)
+;(bst-subset? null bst-example-51749 = <)
+;(not (bst-subset? bst-example-5176 bst-example-51749 = <))
+;(not (bst-subset? bst-example-51749 bst-example-5174 = <))
+
+;;;; 4b
+(define (bst-set-difference x y same? less-than?)
+  (if (empty-tree? x)
+      #t
+      (if (empty-tree? y)
+          #t
+          (and (not (bst-element? (value x) y same? less-than?))
+               (bst-set-difference (left x) y same? less-than?)
+               (bst-set-difference (right x) y same? less-than?)))))
+
+;;; 4b test
+(define bst-example-382 (foldl (lambda (item bst) (bst-insert item bst = <))
+                                '()
+                                '(3 8 2)))
+
+;(bst-set-difference bst-example-382 bst-example-51749 = <)
+;(bst-set-difference null bst-example-51749 = <)
+;(bst-set-difference null null = <)
+
+(define bst-example-283 (foldl (lambda (item bst) (bst-insert item bst = <))
+                                '()
+                                '(2 8 3)))
+
+;;;; 4c
+(define (bst-set-equal? x y same? less-than?)
+  (and (bst-subset? x y same? less-than?)
+       (bst-subset? y x same? less-than?)))
+
+;(bst-set-equal? null null = <)
+;(bst-set-equal? bst-example-382 bst-example-283 = <)
+;(not (bst-set-equal? bst-example-382 bst-example-51749 = <))
+
+;;;; 5a
+(define (bst-delete-min bst)
+  (if (empty-tree? bst)
+      null
+      (if (empty-tree? (left bst))
+          (right bst)
+          (make-tree (value bst)
+                     (bst-delete-min (left bst))
+                     (right bst)))))
+
+;(not (bst-element? 2 (bst-delete-min bst-example-382) = <))
+;(not (bst-element? 2 (bst-delete-min bst-example-283) = <))
+;(not (bst-element? 1 (bst-delete-min bst-example-51749) = <))
+
+(define (bst-delete-max bst)
+  (if (empty-tree? bst)
+      null
+      (if (empty-tree? (right bst))
+          (left bst)
+          (make-tree (value bst)
+                     (left bst)
+                     (bst-delete-max (right bst))))))
+
+;(not (bst-element? 8 (bst-delete-max bst-example-382) = <))
+;(not (bst-element? 8 (bst-delete-max bst-example-283) = <))
+;(not (bst-element? 9 (bst-delete-max bst-example-51749) = <))
+
+(define (bst-delete1 val bst same? less-than?)
+  (cond ((null? val) bst)
+        ((empty-tree? bst) bst)
+        ((same? (value bst) val)
+         (make-tree (bst-largest (left bst))
+                    (bst-delete-max (left bst))
+                    (right bst)))
+        ((less-than? (value bst) val)
+         (make-tree (value bst)
+                    (bst-delete val (left bst) same? less-than?)
+                    (right bst)))
+        (else
+         (make-tree (value bst)
+                    (left bst)
+                    (bst-delete val (right bst) same? less-than?)))))
+
+(define (bst-delete val bst same? less-than?)
+  (if (empty-tree? bst)
+      bst
+      (let ((v (value bst)) (l (left bst)) (r (right bst)))
+        (cond ((and (same? val v) (empty-tree? l) (empty-tree? r)) null)
+              ((and (same? val v) (empty-tree? r)) l)
+              ((and (same? val v) (empty-tree? l)) r)
+              ((same? val v) (make-tree (bst-largest (left bst))
+                                        (bst-delete-max (left bst))
+                                        (right bst)))
+              ((less-than? val v) (make-tree v (bst-delete val l same? less-than?) r))
+              (else (make-tree v l (bst-delete val r same? less-than?)))))))
+
+(bst-delete 2 bst-example-382 = <)
+(bst-delete 5 bst-example-51749 = <)
+(bst-delete 4 bst-example-51749 = <)
+(bst-delete 9 bst-example-51749 = <)
+(bst-delete 1 bst-example-51749 = <)
