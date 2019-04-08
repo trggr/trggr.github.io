@@ -1,0 +1,335 @@
+#lang racket
+
+;"problem 1a."
+(define (create-heap vw-pair left-child right-child)
+  (list vw-pair left-child right-child))
+
+;(create-heap '(surfin-bird . 1) '((da-doo-ron-ron . 2) ()()) '((thats-the-way . 4) ()()))
+
+;"problem 1b."
+;(define (h-min heap)
+;  (car heap))
+
+;"problem 1c."
+;(define (left heap)
+;  (cadr heap))
+;
+;"problem 1d."
+;(define (right heap)
+;  (caddr heap))
+  
+;"problem 1e."
+;(define (weight vw-pair)
+;  (cdr vw-pair))
+;(define (value vw-pair)
+;  (car vw-pair))
+
+(define (h-min heap)
+  (car heap))
+(define (left heap)
+  (cadr heap))
+(define (right heap)
+  (caddr heap))
+(define (weight vw-pair)
+  (cdr vw-pair))
+(define (value vw-pair)
+  (car vw-pair))
+
+(define (insert vw-pair heap)
+  (if (null? heap)
+      (create-heap vw-pair '() '())
+      (if (< (weight vw-pair) (weight (h-min heap)))
+          (create-heap vw-pair heap '())
+          (create-heap (h-min heap) (right heap) (insert vw-pair (left heap))))))
+
+;(insert '(dave . 2) '((al . 3) ((bill . 7) () ()) ()))
+
+;"problem 1f."
+(define (insert-list-of-pairs vw-pair-list heap)
+  (define (helper vw-pair-list heap accumulator)
+    (if (null? vw-pair-list)
+        accumulator
+        (helper (cdr vw-pair-list) heap (insert (car vw-pair-list) accumulator))))
+  (helper vw-pair-list heap heap))                                
+
+;(insert-list-of-pairs '((your . 0) (row . 2.5) (boat . 6)) '((al . 1)
+;                                                             ((bill . 2) ((hal . 5) () ()) ()) ((chas . 3) ((evan . 4) () ()) ())))
+;
+;"problem 1g."
+
+(define (remove-min heap)
+  (if (null? heap)
+      '()
+      (if (null? (left heap))
+          (right heap)
+          (if (null? (right heap))
+              (left heap)
+              (if (< (weight (h-min (left heap))) (weight (h-min (right heap))))
+                  (create-heap (h-min (left heap)) (right heap) (remove-min (left heap)))
+                  (create-heap (h-min (right heap)) (left heap) (remove-min (right heap))))))))
+
+;"problem 2."
+;(define (num-occurs sym lst)
+;  (define (helper sym lst accumulator)
+;    (if (null? lst)
+;        accumulator
+;        (if (equal? (car lst) sym)
+;               (helper sym (cdr lst) (+ 1 accumulator))
+;               (helper sym (cdr lst) accumulator))))
+;  (helper sym lst 0))
+;(num-occurs 'd '(a b c))
+;(num-occurs 'a '(a b c))
+;(num-occurs 'a '(a a a))
+;(num-occurs 'a '(a (a b)))
+
+;"problem 3a."
+;(define (check-if-in-accumulator valu accumulator)
+;  (cond ((null? accumulator) #f)
+;        ((equal? valu (car (car accumulator))) #t)
+;        (else (check-if-in-accumulator valu (cdr accumulator)))))
+;         
+;(define (freq-list lst)
+;  (define (helper accumulator lst)
+;           (cond ((null? lst) accumulator)
+;                 ((not (check-if-in-accumulator (car lst) accumulator)) (helper (cons (cons (car lst) (num-occurs (car lst) lst)) accumulator) (cdr lst)))
+;                 (else (helper accumulator (cdr lst)))))
+;  (helper '() lst))
+;
+;
+
+;"problem 4."
+(define (get-in-order heap)
+  (if (null? heap)
+      '()
+      (cons (h-min heap) (get-in-order (remove-min heap)))))
+
+;(get-in-order '((al . 1) ((bill . 2) ((hal . 5) () ()) ()) ((chas . 3) ((evan . 4) () ()) ())))
+
+(define (heapsort pair-list)
+  (get-in-order (insert-list-of-pairs pair-list '())))
+
+;"problem 5."
+(define (sorted-freq-list lst)
+  (heapsort (freq-list lst)))
+(define (string->word-list str)
+  (define (split-off-first char-list)
+    (define (split-aux char-list res)
+      (if (or (null? char-list)
+              (eq? (car char-list) #\space)
+              (eq? (car char-list) #\newline))
+          (cons (list->string (reverse res)) char-list)
+          (split-aux (cdr char-list) (cons (car char-list) res))))
+    (cond ((eq? (car char-list) #\space)
+           (cons " " (cdr char-list)))
+          ((eq? (car char-list) #\newline)
+           (cons "\n" (cdr char-list)))
+          (else
+           (split-aux char-list '()))))
+  (define (build-word-list char-list word-list)
+    (if (null? char-list)
+        (reverse word-list)
+        (let ((split (split-off-first char-list)))
+          (build-word-list (cdr split)(cons (car split) word-list)))))
+  (build-word-list (string->list str) '()))
+
+(define (surfin-bird) 
+  "a well a everybodys heard about the bird
+bird bird bird b-birds the word
+a well a bird bird bird the bird is the word
+a well a bird bird bird well the bird is the word
+a well a bird bird bird b-birds the word
+a well a bird bird bird well the bird is the word
+a well a bird bird b-birds the word
+a well a bird bird bird b-birds the word
+a well a bird bird bird well the bird is the word
+a well a bird bird b-birds the word
+a well a dont you know about the bird
+well everybody knows that the bird is the word
+a well a bird bird b-birds the word
+a well a
+
+a well a everybodys heard about the bird
+bird bird bird b-birds the word
+a well a bird bird bird b-birds the word
+a well a bird bird bird b-birds the word
+a well a bird bird b-birds the word
+a well a bird bird bird b-birds the word
+a well a bird bird bird b-birds the word
+a well a bird bird bird b-birds the word
+a well a bird bird bird b-birds the word
+a well a dont you know about the bird
+well everybodys talking about the bird
+a well a bird bird b-birds the word
+a well a bird
+
+surfin bird
+bbbbbbbbbbbbbbbbbb aaah
+
+pa pa pa pa pa pa pa pa pa pa pa pa pa pa pa pa
+pa pa pa pa pa pa pa pa pa pa pa pa pa pa ooma mow mow
+papa ooma mow mow
+
+papa ooma mow mow papa ooma mow mow
+papa ooma mow mow papa ooma mow mow
+ooma mow mow papa ooma mow mow
+papa ooma mow mow papa ooma mow mow
+papa ooma mow mow papa ooma mow mow
+oom oom oom oom ooma mow mow
+papa ooma mow mow papa oom oom oom
+oom ooma mow mow papa ooma mow mow
+ooma mow mow papa ooma mow mow
+papa a mow mow papa ooma mow mow
+papa ooma mow mow ooma mow mow
+papa ooma mow mow ooma mow mow
+papa oom oom oom oom ooma mow mow
+oom oom oom oom ooma mow mow
+ooma mow mow papa ooma mow mow
+papa ooma mow mow ooma mow mow
+well dont you know about the bird
+well everybody knows that the bird is the word
+a well a bird bird b-birds the word
+
+papa ooma mow mow papa ooma mow mow
+papa ooma mow mow papa ooma mow mow
+papa ooma mow mow papa ooma mow mow")
+
+; see what (string->word-list (surfin-bird)) produces
+
+;; extra functions using bit sequences
+;; the strings here are strings of 0s and 1s
+;; a bit-sequence is simply an integer
+;; a 1 is added to the start of each bit-sequence
+;; as (number->string x 2) drops leading zeroes
+
+(define (bit-sequence->string num)
+  (define (rem-first string)
+    (substring string 1 (string-length string)))
+  (rem-first (number->string num 2)))
+
+(define (string->bit-sequence  str)
+  (string->number (string-append "1" str) 2))
+
+;; try (bit-sequence->string 1729) and then invert it with string->bit-sequence
+
+; the actual number of bits used is 1 plus the length of the string,
+; each number n encodes a 0-1-string of (floor (log2 n)) characters
+(define (log2 x)
+  (/ (log x)(log 2)))
+
+;"problem 1."
+;(string->word-list "hey my name is Lydia")
+
+(define (word-list->string wlst)
+  (define (helper wlst accumulator)
+    (if (null? wlst)
+        accumulator
+        (helper (cdr wlst) (string-append accumulator (car wlst)))))
+  (helper wlst ""))
+
+; (word-list->string (string->word-list "doo doo doo dah dah dah dah"))
+
+;"problem 2."
+(define (num-occurs sym lst)
+  (define (helper sym lst accumulator)
+    (if (null? lst)
+        accumulator
+        (if (equal? (car lst) sym)
+            (helper sym (cdr lst) (+ 1 accumulator))
+            (helper sym (cdr lst) accumulator))))
+  (helper sym lst 0))
+
+(define (check-if-in-accumulator valu accumulator)
+  (cond ((null? accumulator) #f)
+        ((equal? valu (car (car accumulator))) #t)
+        (else (check-if-in-accumulator valu (cdr accumulator)))))
+         
+(define (freq-list lst)
+  (define (helper accumulator lst)
+    (cond ((null? lst) accumulator)
+          ((not (check-if-in-accumulator (car lst) accumulator))
+           (helper (cons (cons (car lst)
+                               (num-occurs (car lst) lst))
+                         accumulator)
+                   (cdr lst)))
+          (else (helper accumulator (cdr lst)))))
+  (helper '() lst))
+
+(define (word-frequencies text)
+  (freq-list (string->word-list text)))
+
+;(word-frequencies "doo doo doo dah dah dah dah")
+
+
+;"problem 3a."
+(define (make-tree value left right)
+  (list value left right))
+
+;(define (value tree) (car tree))
+;(define (left tree) (cadr tree))
+;(define (right tree) (caddr tree))
+
+(define (make-internal-node 0-tree 1-tree)
+  (make-tree 'internal 0-tree 1-tree))
+ 
+(define (combine-htree-pairs hp1 hp2)
+  (cons (make-internal-node (car hp1) (car hp2)) (+ (cdr hp1) (cdr hp2))))
+
+; (combine-htree-pairs '((internal (dah '() '()) (doo '() '())) . 7) '((  '() '()) . 9))
+
+;"problem 3b."
+;(define (h-min heap)
+;  (car heap))
+;(define (left heap)
+;  (cadr heap))
+;(define (right heap)
+;  (caddr heap))
+;(define (weight vw-pair)
+;  (cdr vw-pair))
+;(define (value vw-pair)
+;  (car vw-pair))
+
+(define (tree-helper sf-list accumulator)
+  (if (null? sf-list)
+      accumulator
+      (tree-helper (cdr sf-list) (cons (cons (make-tree (caar sf-list) '() '()) (cdr (car sf-list))) accumulator)))) 
+
+(define (build-huffman sf-list)
+  (define (helper sf-list)
+    (if (null? sf-list)
+        '()
+        (let ((min1 (h-min sf-list)))
+          (if (null? (remove-min sf-list))
+              (car min1)
+              (let ((min2 (h-min (remove-min sf-list))))
+                (helper (insert (combine-htree-pairs min1 min2) (remove-min (remove-min sf-list)))))))))
+  (helper (insert-list-of-pairs (tree-helper sf-list '()) '())))
+
+; (build-huffman '(("ron" . 57) ("doo" . 21) ("da" . 12)))
+
+(define (fold-right fn init lst)
+  (if (null? lst)
+      init
+      (fn (car lst) (fold-right fn init (cdr lst)))))
+
+(define (rollup x init)
+  (let ((p (car init))
+        (acc (cadr init)))
+    (if (string? x)
+        (list "" (cons (cons x p) acc))
+        (list (string-append p (number->string x)) acc))))
+
+(define htree (build-huffman '(("ron" . 57) ("doo" . 21) ("da" . 12))))
+
+;;;;; problem 4
+(define (get-encoding-list tree)
+  (define (helper tree path)
+    (let ((v (value tree)))
+      (if (string? v)
+          (cons v path)
+          (append (helper (left tree) (cons 0 path))
+                  (helper (right tree) (cons 1 path))))))
+  (cadr (fold-right rollup
+                    (list "" '()) 
+                    (helper tree '()))))
+
+(get-encoding-list htree)
