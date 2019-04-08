@@ -306,45 +306,20 @@ papa ooma mow mow papa ooma mow mow")
 
 ; (build-huffman '(("ron" . 57) ("doo" . 21) ("da" . 12)))
 
-(define (fold-right fn init lst)
-  (if (null? lst)
-      init
-      (fn (car lst) (fold-right fn init (cdr lst)))))
-
-(define (rollup x init)
-  (let ((p (car init))
-        (acc (cadr init)))
-    (if (string? x)
-        (list "" (cons (cons x p) acc))
-        (list (string-append p (number->string x)) acc))))
-
 (define htree (build-huffman '(("ron" . 57) ("doo" . 21) ("da" . 12))))
 
-;;;;; problem 4
 (define (get-encoding-list tree)
   (define (helper tree path)
     (let ((v (value tree)))
       (if (string? v)
-          (cons v path)
-          (append (helper (left tree) (cons 0 path))
-                  (helper (right tree) (cons 1 path))))))
-  (cadr (fold-right rollup
-                    (list "" '()) 
-                    (helper tree '()))))
+          (list (cons v path))
+          (append (helper (left tree) (string-append "0" path))
+                  (helper (right tree) (string-append "1" path))))))
+  (helper tree ""))
 
 (get-encoding-list htree)
 
-;;;;;------------------------------- Lydia's solution
-"problem 4."
-(define (get-encoding-list htree)
-  (define (helper htree accumulator)
-    (cond ((string? (h-min htree)) (list (cons (h-min htree) accumulator)))
-          (else (append (helper (right htree) (string-append accumulator "1")) (helper (left htree) (string-append accumulator "0"))))))
-    (helper htree ""))
-
-(get-encoding-list '('internal ('internal ("da" '() '()) ("doo" '() '())) ("ron" '() '())))
-
-"problem 5."
+;;;; "problem 5."
 (define (encode string encoding-list)
   (define (weightfinder string encoding-list)
     (cond ((null? string) "")
@@ -354,5 +329,4 @@ papa ooma mow mow papa ooma mow mow")
     (if (null? string)
         accumulator 
         (helper (cdr string) encoding-list (string-append accumulator (weightfinder (car string) encoding-list)))))
-  (helper (string->word-list string) encoding-list ""))
-  
+  (helper (string->word-list string) encoding-list ""))             
