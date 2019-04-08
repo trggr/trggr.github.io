@@ -333,3 +333,26 @@ papa ooma mow mow papa ooma mow mow")
                     (helper tree '()))))
 
 (get-encoding-list htree)
+
+;;;;;------------------------------- Lydia's solution
+"problem 4."
+(define (get-encoding-list htree)
+  (define (helper htree accumulator)
+    (cond ((string? (h-min htree)) (list (cons (h-min htree) accumulator)))
+          (else (append (helper (right htree) (string-append accumulator "1")) (helper (left htree) (string-append accumulator "0"))))))
+    (helper htree ""))
+
+(get-encoding-list '('internal ('internal ("da" '() '()) ("doo" '() '())) ("ron" '() '())))
+
+"problem 5."
+(define (encode string encoding-list)
+  (define (weightfinder string encoding-list)
+    (cond ((null? string) "")
+          ((equal? string (value (car encoding-list))) (weight (car encoding-list)))
+          (else (weightfinder string (cdr encoding-list)))))
+  (define (helper string encoding-list accumulator)
+    (if (null? string)
+        accumulator 
+        (helper (cdr string) encoding-list (string-append accumulator (weightfinder (car string) encoding-list)))))
+  (helper (string->word-list string) encoding-list ""))
+  
