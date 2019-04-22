@@ -330,3 +330,210 @@ papa ooma mow mow papa ooma mow mow")
         accumulator 
         (helper (cdr string) encoding-list (string-append accumulator (weightfinder (car string) encoding-list)))))
   (helper (string->word-list string) encoding-list ""))             
+
+
+;;---------------- 9 ----------------------
+#lang racket
+
+;; utilities for tracing function calls
+
+;;;;;;;;;;;;;;;;
+; definition of special form trace-define, which works like define
+; but causes trace information to be displayed
+; body in trace-define must be a single expression.  Use begin if you must.
+
+; usage:
+; (trace-define (name args) body)
+; works like
+; (define (name args) body)
+; with tracing
+
+(define-syntax trace-define
+  (syntax-rules ()
+    ((trace-define (name . args) body)
+     (define (name . args)
+       (trace-enter (quote name) . args)
+       (trace-return  body (quote name) . args)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;
+; functions for printing things on entry and return from a function
+; used by trace-define
+(define (trace-enter name . values)
+  (display-skip *trace-depth*)
+  (display "Calling ")
+  (display name)
+  (display-spaced "with parameter(s):")
+  (for-each display-spaced values)
+  (newline)
+  (inc-trace-depth))
+
+(define (trace-return val fname . args)
+  (dec-trace-depth)
+  (display-skip *trace-depth*)
+  (display "(")
+  (display fname)
+  (for-each display-spaced args)
+  (display ") ==> ")
+  (display val)
+  (newline)
+  val)
+
+;;;;;;;;;;;;;;;;;;;;  
+; stuff for manipulating the indentation, skipping spaces, etc 
+(define *trace-depth* 0)  ; global variable
+(define (reset-trace-depth)(set! *trace-depth* 0))
+(define (inc-trace-depth) (set! *trace-depth* (+ *trace-depth* 1)))
+(define (dec-trace-depth) (set! *trace-depth* (- *trace-depth* 1)))
+
+(define (display-spaced item)
+  (display " ")
+  (display item))
+
+(define (display-skip depth)(display (make-string (* 3 depth) #\space)))
+
+; "problem 1"
+(define (new-car i a)
+  (let ((start 0)
+        (finish 0)
+        (arrival a))
+    (define (set-start f) (set! start f))
+    (define (set-finish f) (set! finish f))
+    (define (get-finish) finish)
+    (define (get-wait-time) (abs (- start arrival)))
+    (define (get-total-time) (- finish arrival))
+    (define (get-id) i)
+    (lambda (method)
+      (cond ((eq? method 'set-start) set-start)
+            ((eq? method 'set-finish) set-finish)
+            ((eq? method 'get-wait) get-wait-time)
+            ((eq? method 'get-total) get-total-time)
+            ((eq? method 'get-id) get-id)))))
+
+;(define lydia (new-car 1 10))
+;((lydia 'set-start) 21)
+;((lydia 'set-finish) 30)
+;((lydia 'get-total))
+
+; "problem 2."
+(define (make-event t e c)
+  (let ((whip c)
+        (event e)
+        (time t))
+    (define (get-time) time)
+    (define (get-type) event)
+    (define (get-car) whip)
+    (lambda (method) 
+      (cond ((eq? method 'time) get-time)
+            ((eq? method 'type) get-type)
+            ((eq? method 'car) get-car)))))
+
+; (define lydia (make-event 1 'arrival (new-car 1 10)))
+
+; "problem 3."
+(define (prng seed min max)
+  (let ((multi (expt 7 5))
+        (x seed)
+        (modulus (- (expt 2 31) 1)))
+    (define (next) (begin (set! x (modulo (* multi x) modulus)) (get)))
+    (define (get) (+ min (modulo x (- max min))))
+    (lambda (method)
+      (cond ((eq? method 'next) next)
+            ((eq? method 'get) get)))))
+
+;(define lydia (prng 1729 10 42))
+;((lydia 'get))
+;((lydia 'get))
+;((lydia 'next))
+;((lydia 'get))
+;((lydia 'next))
+;((lydia 'get))((lydia 'next))
+;((lydia 'get))
+;((lydia 'next))
+;((lydia 'next))
+;((lydia 'next))
+
+; "problem 4."
+(define (make-stack)
+  (let ((S '()))
+    (define (is-empty?) (null? S))
+    (define (push thing-to-push)
+      (set! S (cons thing-to-push S)))
+    (define (top)
+      (if (null? S)
+          '()
+          (car S)))
+    (define (pop) (let ((top (car S)))
+      (begin (set! S (cdr S)) top)))
+    (lambda (meth-name)
+      (cond ((eq? meth-name 'empty?) is-empty?)
+            ((eq? meth-name 'push) push)
+            ((eq? meth-name 'top) top)
+            ((eq? meth-name 'pop) pop)))))
+
+(define lydia (make-stack))
+((lydia 'push) 53)
+((lydia 'push) 52)
+(define (helper operator)
+  (let ((first-number (begin ((lydia 'top))))
+        (second-number (begin ((lydia 'pop)) ((lydia 'top)))))
+    (operator first-number second-number)))
+
+; "problem 5."
+(define stack (make-stack))
+;((stack 'push) 23)
+;((stack 'push) 15)
+;((stack 'pop))
+;((stack 'pop))
+;(define first (stack 'pop))
+;(define second (stack 'pop))
+;
+(define (helper1 operator stackr)
+    ((stackr 'push) (operator (first) (second))))
+      
+(define (eval-postfix p)
+    (cond ((null? p) ((stack 'top)))
+          ((number?(car p)) (begin ((stack 'push) (car p)) (eval-postfix (cdr p))))
+          ((equal? #\+ (car p)) (begin (helper1 + stack) (eval-postfix (cdr p))))
+          ((equal? #\- (car p)) (begin (helper1 - stack) (eval-postfix (cdr p))))
+          ((equal? #\* (car p)) (begin (helper1 * stack) (eval-postfix (cdr p))))
+          ((equal? #\/ (car p)) (begin (helper1 / stack) (eval-postfix (cdr p))))
+          ((equal? #\^ (car p)) (begin (helper1 expt stack) (eval-postfix (cdr p))))))
+;(eval-postfix (list 23 15 (string-ref (symbol->string '+) 0)))
+;(eval-postfix (list 23 15 8 (string-ref (symbol->string '+) 0) (string-ref (symbol->string '*) 0)))
+
+;"problem 6."
+;(define (make-queue)
+;  (let ((Q '()))
+;    (define (empty?) (null? Q))
+;    (define (enqueue x)
+;      (let ((R (reverse Q)))
+;        (set! Q (reverse (cons x R)))))
+;    (define (dequeue)
+;      (if (null? (cdr Q))
+;          '()
+;          (begin (set! Q (cdr Q)) (car Q))))
+;    (lambda (dispatcher)
+;      (cond ((eq? dispatcher 'empty?) empty?)
+;            ((eq? dispatcher 'enqueue) enqueue)
+;            ((eq? dispatcher 'dequeue) dequeue)))))
+
+"problem 6."
+(define (make-queue)
+  (let ((Q '()))
+    (define (empty?) (null? Q))
+    (define (enqueue x) (set! Q (cons x Q)))
+    (define (dequeue)
+      (if (null? Q)
+          '()
+          (let* ((R (reverse Q))
+                 (last (car R)))
+            (set! Q (reverse (cdr R)))
+            last)))
+    (lambda (dispatcher)
+      (cond ((eq? dispatcher 'empty?) empty?)
+            ((eq? dispatcher 'enqueue) enqueue)
+            ((eq? dispatcher 'dequeue) dequeue)))))
+
+(define cat (make-queue))
+((cat 'enqueue) 1) ((cat 'enqueue) 11) ((cat 'enqueue) 111)
+((cat 'dequeue)) ((cat 'dequeue)) ((cat 'dequeue))
